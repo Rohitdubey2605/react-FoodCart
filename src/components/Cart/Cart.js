@@ -3,6 +3,7 @@ import Modal from "../UI/Modal";
 import { useContext } from "react";
 import CartContext from "../../store/cart-context";
 import CartItem from "./CartItem";
+// import Fun from "./Fun";
 
 const Cart = (props) => {
   const cartCtx = useContext(CartContext);
@@ -15,7 +16,7 @@ const Cart = (props) => {
   };
 
   const cartItemAddHandler = (item) => {
-    cartCtx.addItem({...item,amount:1});
+    cartCtx.addItem({ ...item, amount: 1 });
   };
 
   const cartItems = (
@@ -35,6 +36,12 @@ const Cart = (props) => {
     </ul>
   );
 
+  // const fun = () => {
+  //   console.log("fd");
+
+  //   <Fun></Fun>;
+  // };
+
   return (
     <Modal onClose={props.onClose}>
       {cartItems}
@@ -46,7 +53,11 @@ const Cart = (props) => {
         <button className={styles["button--alt"]} onClick={props.onClose}>
           Close
         </button>
-        {hasItems && <button className={styles["button"]}>Order</button>}
+        {hasItems && (
+          <button className={styles["button"]} onClick={props.onOrder}>
+            Order
+          </button>
+        )}
       </div>
     </Modal>
   );
