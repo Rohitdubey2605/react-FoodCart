@@ -3,9 +3,14 @@ import Modal from "../UI/Modal";
 import { useContext } from "react";
 import CartContext from "../../store/cart-context";
 import CartItem from "./CartItem";
-// import Fun from "./Fun";
+import Checkout from "./Checkout";
+import { useState } from "react";
+import { Fragment } from "react";
 
 const Cart = (props) => {
+  const [isOrderClicked, setIsOrderClicked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `₹${cartCtx.totalAmount.toFixed(2)}`;
@@ -19,6 +24,23 @@ const Cart = (props) => {
     cartCtx.addItem({ ...item, amount: 1 });
   };
 
+  const orderHandler = () => {
+    setIsOrderClicked(true);
+  };
+
+  const submitOrderHandler = async (userData) =>{
+    setIsSubmitting(true);
+    await fetch('https://foodcart-rd-default-rtdb.firebaseio.com/orders.json',{
+      method: 'POST',
+      body: JSON.stringify({
+        user: userData,
+        orderedItems: cartCtx.items
+      })    
+    });
+    setIsSubmitting(false);
+    setDidSubmit(true);
+    cartCtx.clearCart();
+  }
   const cartItems = (
     <ul className={styles["cart-items"]}>
       {cartCtx.items.map((item) => {
@@ -36,29 +58,43 @@ const Cart = (props) => {
     </ul>
   );
 
-  // const fun = () => {
-  //   console.log("fd");
-
-  //   <Fun></Fun>;
-  // };
-
-  return (
-    <Modal onClose={props.onClose}>
+  const cartModalContent = (
+    <Fragment>
       {cartItems}
       <div className={styles.total}>
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      <div className={styles.actions}>
-        <button className={styles["button--alt"]} onClick={props.onClose}>
-          Close
-        </button>
-        {hasItems && (
-          <button className={styles["button"]} onClick={props.onOrder}>
-            Order
+      {isOrderClicked && <Checkout onConfirm={submitOrderHandler} onClose={props.onClose} />}
+      {!isOrderClicked && (
+        <div className={styles.actions}>
+          <button className={styles["button--alt"]} onClick={props.onClose}>
+            Close
           </button>
-        )}
-      </div>
+          {hasItems && (
+            <button className={styles["button"]} onClick={orderHandler}>
+              Order
+            </button>
+          )}
+        </div>
+      )}
+    </Fragment>
+  )
+
+  const isSubmittingModalContent = <p>Sending Order Data...</p>
+  const didSubmittingModalContent = <Fragment>
+<p>Order Successful.</p>
+<div className={styles.actions}>
+          <button className={styles["button--alt"]} onClick={props.onClose}>
+            Close
+          </button>
+        </div>
+  </Fragment> 
+  return (
+    <Modal onClose={props.onClose}>
+      {!isSubmitting && !didSubmit && cartModalContent}
+      {isSubmitting && isSubmittingModalContent}
+      {!isSubmitting && didSubmit && didSubmittingModalContent}
     </Modal>
   );
 };
