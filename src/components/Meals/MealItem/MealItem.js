@@ -15,7 +15,10 @@ const MealItem = (props) => {
         amount: amount,
         price: props.price
       })
+
   }
+
+  
   return (
     <li className={styles.meal}>
       <div>
